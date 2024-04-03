@@ -222,6 +222,7 @@ impl U256 {
 
         for chr in string.chars().skip(skip) {
             let digit = chr.to_digit(radix);
+
             if let Some(dig) = digit {
                 let value_raised_pow = value << pow;
                 value = value_raised_pow ^ (dig as u64);
@@ -405,17 +406,10 @@ impl U256 {
     pub fn div_single(self, divisor: u64) -> Self {
         if self.0[0] == 0 && self.0[1] == 0 {
             if self.0[2] == 0 {
-                Self([0, 0, 0, self.0[3] / divisor])
+                Self::from(self.0[3] / divisor)
             } else {
-                let value_128 = ((self.0[2] as u128).wrapping_shl(64)
-                    + (self.0[3] as u128))
-                    / (divisor as u128);
-                Self([
-                    0,
-                    0,
-                    (value_128 >> 64) as u64,
-                    (value_128 & (0xFFFF_FFFF_FFFF_FFFF)) as u64,
-                ])
+                let value_128 = Into::<u128>::into(self) / (divisor as u128);
+                Self::from(value_128)
             }
         } else {
             let div = Self([0, 0, 0, divisor]);
@@ -444,17 +438,10 @@ impl U256 {
     pub fn rem_single(self, divisor: u64) -> Self {
         if self.0[0] == 0 && self.0[1] == 0 {
             if self.0[2] == 0 {
-                Self([0, 0, 0, self.0[3] % divisor])
+                Self::from(self.0[3] % divisor)
             } else {
-                let value_128 = ((self.0[2] as u128).wrapping_shl(64)
-                    + (self.0[3] as u128))
-                    % (divisor as u128);
-                Self([
-                    0,
-                    0,
-                    (value_128 >> 64) as u64,
-                    (value_128 & (0xFFFF_FFFF_FFFF_FFFF)) as u64,
-                ])
+                let value_128 = Into::<u128>::into(self) % (divisor as u128);
+                Self::from(value_128)
             }
         } else {
             let div = Self([0, 0, 0, divisor]);
@@ -669,12 +656,6 @@ impl U256 {
             + count_bits(self.0[2])
             + count_bits(self.0[3])
     }
-
-    // #[inline]
-    // pub fn repr(self) -> Vec<u8> {
-    //     let value: Vec<u8> = self.0.map(u64::to_be_bytes).concat();
-    //     value
-    // }
 }
 
 impl core::ops::Not for U256 {
@@ -697,11 +678,8 @@ impl core::cmp::Ord for U256 {
         if self.0[2] != other.0[2] {
             return self.0[2].cmp(&other.0[2]);
         }
-        if self.0[3] != other.0[3] {
-            return self.0[3].cmp(&other.0[3]);
-        }
 
-        core::cmp::Ordering::Equal
+        self.0[3].cmp(&other.0[3])
     }
 }
 
@@ -801,6 +779,76 @@ impl core::str::FromStr for U256 {
         } else {
             Self::from_string(s)
         }
+    }
+}
+
+impl From<u128> for U256 {
+    #[inline]
+    fn from(value: u128) -> Self {
+        Self([0, 0, (value >> 64) as u64, value as u64])
+    }
+}
+
+impl From<u64> for U256 {
+    #[inline]
+    fn from(value: u64) -> Self {
+        Self([0, 0, 0, value])
+    }
+}
+
+impl From<u32> for U256 {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self([0, 0, 0, value as u64])
+    }
+}
+
+impl From<u16> for U256 {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self([0, 0, 0, value as u64])
+    }
+}
+
+impl From<u8> for U256 {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self([0, 0, 0, value as u64])
+    }
+}
+
+impl Into<u128> for U256 {
+    #[inline]
+    fn into(self) -> u128 {
+        ((self.0[2] as u128) << 64) | (self.0[3] as u128)
+    }
+}
+
+impl Into<u64> for U256 {
+    #[inline]
+    fn into(self) -> u64 {
+        self.0[3]
+    }
+}
+
+impl Into<u32> for U256 {
+    #[inline]
+    fn into(self) -> u32 {
+        self.0[3] as u32
+    }
+}
+
+impl Into<u16> for U256 {
+    #[inline]
+    fn into(self) -> u16 {
+        self.0[3] as u16
+    }
+}
+
+impl Into<u8> for U256 {
+    #[inline]
+    fn into(self) -> u8 {
+        self.0[3] as u8
     }
 }
 
@@ -1170,13 +1218,13 @@ mod test {
         ]);
         let c = a + b;
         assert_eq!(
-            c.0,
-            [
+            c,
+            U256([
                 0x1,
                 0xFFFF_FFFF_FFFF_FFFF,
                 0xFFFF_FFFF_FFFF_FFFF,
                 0xFFFF_FFFF_FFFF_FFFE
-            ]
+            ])
         );
 
         Ok(())
