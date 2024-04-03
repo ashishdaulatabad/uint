@@ -1,4 +1,4 @@
-use super::u256::count_bits;
+use super::count_bits;
 use super::ThenOr;
 
 /// An extended 64-byte (or 512-bit) unsigned integer

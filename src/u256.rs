@@ -68,29 +68,6 @@ impl core::error::Error for ParseUintError {
     }
 }
 
-/// Count total bits in a number
-///
-/// ```
-/// use uint::u256::count_bits;
-///
-/// assert_eq!(count_bits(10), 2);    // 0x0A
-/// assert_eq!(count_bits(15), 4);    // 0x0F
-/// assert_eq!(count_bits(255), 8);    // 0xFF
-/// assert_eq!(count_bits(0xFFFF_FFFF_FFFF_FFFF), 64);
-/// assert_eq!(count_bits(0xFFFF_FFFF_FFFF_FFFF), 64);
-/// ```
-pub const fn count_bits(number: u64) -> u64 {
-    let mut ans = (number & 0x5555_5555_5555_5555)
-        + ((number & 0xAAAA_AAAA_AAAA_AAAA) >> 1);
-    ans = (ans & 0x3333_3333_3333_3333) + ((ans & 0xCCCC_CCCC_CCCC_CCCC) >> 2);
-    ans = (ans & 0x0F0F_0F0F_0F0F_0F0F) + ((ans & 0xF0F0_F0F0_F0F0_F0F0) >> 4);
-    ans = (ans & 0x00FF_00FF_00FF_00FF) + ((ans & 0xFF00_FF00_FF00_FF00) >> 8);
-    ans = (ans & 0x0000_FFFF_0000_FFFF) + ((ans & 0xFFFF_0000_FFFF_0000) >> 16);
-    ans = (ans & 0x0000_0000_FFFF_FFFF) + ((ans & 0xFFFF_FFFF_0000_0000) >> 32);
-
-    ans
-}
-
 impl ThenOr for bool {
     #[inline(always)]
     fn then_or<T, B, Result>(self, fn1: T, fn2: B) -> Result
@@ -651,10 +628,10 @@ impl U256 {
 
     #[inline(always)]
     pub const fn bits(self) -> u64 {
-        count_bits(self.0[0])
-            + count_bits(self.0[1])
-            + count_bits(self.0[2])
-            + count_bits(self.0[3])
+        super::count_bits(self.0[0])
+            + super::count_bits(self.0[1])
+            + super::count_bits(self.0[2])
+            + super::count_bits(self.0[3])
     }
 }
 
@@ -1134,7 +1111,7 @@ impl core::ops::BitXorAssign<u64> for U256 {
 
 #[cfg(test)]
 mod test {
-    use super::{count_bits, ParseUintError, U256};
+    use super::{super::count_bits, ParseUintError, U256};
 
     #[test]
     fn gen_test() -> Result<(), ParseUintError> {
@@ -1175,15 +1152,7 @@ mod test {
 
         // Max value of 256-bit number
         let value = U256::from_string("115792089237316195423570985008687907853269984665640564039457584007913129639935")?;
-        assert_eq!(
-            value.0,
-            [
-                0xFFFF_FFFF_FFFF_FFFF,
-                0xFFFF_FFFF_FFFF_FFFF,
-                0xFFFF_FFFF_FFFF_FFFF,
-                0xFFFF_FFFF_FFFF_FFFF,
-            ]
-        );
+        assert_eq!(value, U256::MAX);
 
         Ok(())
     }
