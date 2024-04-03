@@ -1,18 +1,8 @@
-use super::ThenOr;
+use super::{count_bits, ParseUintError, ThenOr};
 
 /// An extended 32-byte (or 256-bit) unsigned integer
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U256([u64; 4]);
-
-/// A custom error handling for failed parsing attempt
-/// of unsigned integer
-#[repr(u8)]
-#[derive(Debug)]
-pub enum ParseUintError {
-    /// Occurence of an invalid character while parsing string
-    #[non_exhaustive]
-    InvalidDigit,
-}
 
 impl core::fmt::LowerHex for U256 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -50,20 +40,6 @@ impl core::fmt::UpperHex for U256 {
             f.write_fmt(format_args!("{:X}{:016X}", self.0[2], self.0[3]))
         } else {
             f.write_fmt(format_args!("{:X}", self.0[3]))
-        }
-    }
-}
-
-impl core::fmt::Display for ParseUintError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.write_fmt(format_args!("{:?}", self))
-    }
-}
-
-impl core::error::Error for ParseUintError {
-    fn description(&self) -> &str {
-        match *self {
-            Self::InvalidDigit => "invalid digit found while parsing integer",
         }
     }
 }
@@ -640,10 +616,10 @@ impl U256 {
 
     #[inline(always)]
     pub const fn bits(self) -> u64 {
-        super::count_bits(self.0[0])
-            + super::count_bits(self.0[1])
-            + super::count_bits(self.0[2])
-            + super::count_bits(self.0[3])
+        count_bits(self.0[0])
+            + count_bits(self.0[1])
+            + count_bits(self.0[2])
+            + count_bits(self.0[3])
     }
 }
 

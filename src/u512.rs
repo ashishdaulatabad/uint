@@ -1,19 +1,8 @@
-use super::count_bits;
-use super::ThenOr;
+use super::{count_bits, ParseUintError, ThenOr};
 
 /// An extended 64-byte (or 512-bit) unsigned integer
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U512([u64; 8]);
-
-/// A custom error handling for failed parsing attempt
-/// of unsigned integer
-#[repr(u8)]
-#[derive(Debug)]
-pub enum ParseUintError {
-    /// Occurence of an invalid character while parsing string
-    #[non_exhaustive]
-    InvalidDigit,
-}
 
 impl core::fmt::LowerHex for U512 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -127,20 +116,6 @@ impl core::fmt::UpperHex for U512 {
             f.write_fmt(format_args!("{:X}{:064X}", self.0[6], self.0[7]))
         } else {
             f.write_fmt(format_args!("{:X}", self.0[7]))
-        }
-    }
-}
-
-impl core::fmt::Display for ParseUintError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.write_fmt(format_args!("{:?}", self))
-    }
-}
-
-impl core::error::Error for ParseUintError {
-    fn description(&self) -> &str {
-        match *self {
-            Self::InvalidDigit => "invalid digit found while parsing integer",
         }
     }
 }
