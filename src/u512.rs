@@ -1,7 +1,7 @@
-use super::ThenOr;
 use super::u256::count_bits;
+use super::ThenOr;
 
-/// An extended 32-byte (or 256-bit) unsigned integer
+/// An extended 64-byte (or 512-bit) unsigned integer
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U512([u64; 8]);
 
@@ -145,7 +145,6 @@ impl core::error::Error for ParseUintError {
     }
 }
 
-
 impl U512 {
     /// Maximum value for `U512`
     pub const MAX: Self = U512([0xFFFF_FFFF_FFFF_FFFF; 8]);
@@ -197,6 +196,7 @@ impl U512 {
 
         for chr in string.chars() {
             let digit = chr.to_digit(10);
+
             if let Some(dig) = digit {
                 let (value_x_8, value_x_2) = (value << 3, value << 1);
                 value = (value_x_8 + value_x_2).add_single(dig as u64);
@@ -1648,6 +1648,10 @@ mod test {
                 0xFFFF_FFFF_FFFF_FFFF,
             ]
         );
+
+        // Max value of 512-bit number
+        let value = "13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006084095".parse::<U512>()?;
+        assert_eq!(value, U512::MAX);
 
         Ok(())
     }
