@@ -1200,7 +1200,7 @@ mod test {
             - (U256::ONE << 6)
             - (U256::ONE << 4);
 
-        assert_eq!(p, U256::from_string_radix_pow_2("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16)?);
+        assert_eq!(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".parse::<U256>()?);
 
         Ok(())
     }
