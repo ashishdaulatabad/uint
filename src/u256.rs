@@ -1,6 +1,5 @@
 use super::ThenOr;
 
-
 /// An extended 32-byte (or 256-bit) unsigned integer
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U256([u64; 4]);
@@ -788,6 +787,23 @@ impl core::ops::Neg for U256 {
     }
 }
 
+impl core::str::FromStr for U256 {
+    type Err = ParseUintError;
+
+    #[inline]
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.starts_with("0x") {
+            Self::from_string_radix_pow_2(s, 16)
+        } else if s.starts_with("0b") {
+            Self::from_string_radix_pow_2(s, 2)
+        } else if s.starts_with("0o") {
+            Self::from_string_radix_pow_2(s, 8)
+        } else {
+            Self::from_string(s)
+        }
+    }
+}
+
 impl core::ops::Add<U256> for U256 {
     type Output = U256;
 
@@ -1253,9 +1269,8 @@ mod test {
 
         assert_eq!(
             a >> 1,
-            U256::from_string(
-                "149091451716587021758373944121409249037535427910802186698752"
-            )?
+            "149091451716587021758373944121409249037535427910802186698752"
+                .parse::<U256>()?
         );
 
         assert_eq!(a >> 178, U256::from_string("778293")?);
