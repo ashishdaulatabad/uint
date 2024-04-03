@@ -17,7 +17,7 @@ trait ThenOr {
 /// Count total bits in a number
 ///
 /// ```
-/// use uint::u256::count_bits;
+/// use uint::count_bits;
 ///
 /// assert_eq!(count_bits(10), 2);    // 0x0A
 /// assert_eq!(count_bits(15), 4);    // 0x0F

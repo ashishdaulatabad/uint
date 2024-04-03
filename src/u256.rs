@@ -336,48 +336,60 @@ impl U256 {
     }
 
     fn div_internal(self, other: Self) -> Self {
-        let div = other;
-        let mut divisor = other;
-        let leading_zeros = divisor.leading_zeros();
-        divisor <<= leading_zeros - self.leading_zeros();
+        match self.cmp(&other) {
+            core::cmp::Ordering::Less => Self::ZERO,
+            core::cmp::Ordering::Equal => Self::ONE,
+            _ => {
+                let div = other;
+                let mut divisor = other;
+                let leading_zeros = divisor.leading_zeros();
+                divisor <<= leading_zeros - self.leading_zeros();
 
-        let mut value = self;
-        let mut quotient = Self::MIN;
+                let mut value = self;
+                let mut quotient = Self::MIN;
 
-        while value >= div {
-            while value < divisor {
-                divisor >>= 1;
-                quotient <<= 1;
+                while value >= div {
+                    while value < divisor {
+                        divisor >>= 1;
+                        quotient <<= 1;
+                    }
+
+                    value -= divisor;
+                    quotient = quotient.add_single(1);
+                }
+                let rem_offset = div.leading_zeros() - divisor.leading_zeros();
+
+                quotient << rem_offset
             }
-
-            value -= divisor;
-            quotient = quotient.add_single(1);
         }
-        let rem_offset = div.leading_zeros() - divisor.leading_zeros();
-
-        quotient << rem_offset
     }
 
     fn rem_internal(self, other: Self) -> Self {
-        let div = other;
-        let mut divisor = other;
-        let leading_zeros = divisor.leading_zeros();
-        divisor <<= leading_zeros - self.leading_zeros();
+        match self.cmp(&other) {
+            core::cmp::Ordering::Less => self,
+            core::cmp::Ordering::Equal => Self::ZERO,
+            _ => {
+                let div = other;
+                let mut divisor = other;
+                let leading_zeros = divisor.leading_zeros();
+                divisor <<= leading_zeros - self.leading_zeros();
 
-        let mut value = self;
-        let mut quotient = U256::ZERO;
+                let mut value = self;
+                let mut quotient = Self::MIN;
 
-        while value >= div {
-            while value < divisor {
-                divisor >>= 1;
-                quotient <<= 1;
+                while value >= div {
+                    while value < divisor {
+                        divisor >>= 1;
+                        quotient <<= 1;
+                    }
+
+                    value -= divisor;
+                    quotient = quotient.add_single(1);
+                }
+
+                value
             }
-
-            value -= divisor;
-            quotient = quotient.add_single(1);
         }
-
-        value
     }
 
     pub fn div_single(self, divisor: u64) -> Self {

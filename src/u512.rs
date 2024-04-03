@@ -456,7 +456,7 @@ impl U512 {
                 divisor <<= leading_zeros - self.leading_zeros();
 
                 let mut value = self;
-                let mut quotient = Self::MIN;
+                let mut quotient = Self::ZERO;
 
                 while value >= div {
                     while value < divisor {
@@ -467,9 +467,8 @@ impl U512 {
                     value -= divisor;
                     quotient = quotient.add_single(1);
                 }
-                let rem_offset = div.leading_zeros() - divisor.leading_zeros();
 
-                quotient << rem_offset
+                value
             }
         }
     }
@@ -1862,9 +1861,9 @@ mod test {
         let a = U512::from_string(
             "294089934049489289928723213214128471823791287151431649155974",
         )?;
-        let b = U512::from_string("940899340494892899287232132141")?;
+        let b = "940899340494892899287232132141".parse::<U512>()?;
 
-        assert_eq!(a % b, U512::from_string("229622695252588468980047866375")?);
+        assert_eq!(a % b, "229622695252588468980047866375".parse::<U512>()?);
 
         let a = U512::from_string("3912093812908391208428194902184908123982189742178629873982173391238912")?;
         let b = U512::from_string(
