@@ -820,7 +820,7 @@ impl From<u8> for U256 {
 impl From<U256> for u128 {
     #[inline]
     fn from(value: U256) -> Self {
-        ((value.0[2] << 64) as u128) | (value.0[3] as u128)
+        ((value.0[2] as u128) << 64) | (value.0[3] as u128)
     }
 }
 
