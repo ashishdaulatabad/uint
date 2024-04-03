@@ -598,7 +598,7 @@ impl U256 {
     /// ```
     #[inline(always)]
     pub const fn is_zero(&self) -> bool {
-        self.0[0] == 0 && self.0[1] == 0 && self.0[0] == 0 && self.0[3] == 0
+        self.0[0] == 0 && self.0[1] == 0 && self.0[2] == 0 && self.0[3] == 0
     }
 
     /// Convenient function to check whether this number is
@@ -817,10 +817,10 @@ impl From<u8> for U256 {
     }
 }
 
-impl Into<u128> for U256 {
+impl From<U256> for u128 {
     #[inline]
-    fn into(self) -> u128 {
-        ((self.0[2] as u128) << 64) | (self.0[3] as u128)
+    fn from(value: U256) -> Self {
+        ((value.0[2] << 64) as u128) | (value.0[3] as u128)
     }
 }
 
