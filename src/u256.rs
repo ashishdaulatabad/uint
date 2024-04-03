@@ -1075,7 +1075,7 @@ mod test {
     use alloc::boxed::Box;
 
     #[test]
-    pub fn gen_test() -> Result<(), Box<dyn core::error::Error>> {
+    fn gen_test() -> Result<(), Box<dyn core::error::Error>> {
         let value = U256::from_string("12345678919")?;
         assert!(value.raw_eq([0, 0, 0, 12345678919]));
 
@@ -1127,13 +1127,13 @@ mod test {
     }
 
     #[test]
-    pub fn test_bits() {
+    fn test_bits() {
         assert_eq!(count_bits(0b01011100), 4);
         assert_eq!(count_bits(0b01_1100_1111_0011_1110_1001), 14);
     }
 
     #[test]
-    pub fn test_add() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_add() -> Result<(), Box<dyn core::error::Error>> {
         let a = U256::from_string("1245")?;
         let b = U256::from_string("4546477")?;
         let c = a + b;
@@ -1167,7 +1167,7 @@ mod test {
     }
 
     #[test]
-    pub fn test_sub() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_sub() -> Result<(), Box<dyn core::error::Error>> {
         let a = U256::from_string("12131414122")?;
         let b = U256::from_string("4546477")?;
         let c = a - b;
@@ -1190,7 +1190,7 @@ mod test {
     }
 
     #[test]
-    pub fn test_mul_single() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_mul_single() -> Result<(), Box<dyn core::error::Error>> {
         let a = U256::from_string("124312312142135")?;
         let b = 4546477;
         let c = a * b;
