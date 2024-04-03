@@ -1,5 +1,5 @@
 #![feature(error_in_core)]
-#![no_std]
+// #![no_std]
 
 trait ThenOr {
     fn then_or<T, B, Result>(self, fn1: T, fn2: B) -> Result
@@ -15,3 +15,4 @@ trait ThenOr {
 }
 
 pub mod u256;
+pub mod u512;

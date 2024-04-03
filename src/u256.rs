@@ -414,7 +414,7 @@ impl U256 {
         } else {
             let div = Self([0, 0, 0, divisor]);
             let mut div_256 = Self([0, 0, 0, divisor]);
-            let leading_zeros = divisor.leading_zeros();
+            let leading_zeros = div.leading_zeros();
             div_256 <<= self.leading_zeros() - leading_zeros;
 
             let mut value = self;
@@ -446,7 +446,7 @@ impl U256 {
         } else {
             let div = Self([0, 0, 0, divisor]);
             let mut div_256 = Self([0, 0, 0, divisor]);
-            let leading_zeros = divisor.leading_zeros();
+            let leading_zeros = div.leading_zeros();
             div_256 <<= self.leading_zeros() - leading_zeros;
 
             let mut value = self;
@@ -1134,12 +1134,12 @@ impl core::ops::BitXorAssign<u64> for U256 {
 
 #[cfg(test)]
 mod test {
-    use super::{count_bits, U256};
+    use super::{count_bits, ParseUintError, U256};
     extern crate alloc;
     use alloc::boxed::Box;
 
     #[test]
-    fn gen_test() -> Result<(), Box<dyn core::error::Error>> {
+    fn gen_test() -> Result<(), ParseUintError> {
         let value = U256::from_string("12345678919")?;
         assert!(value.raw_eq([0, 0, 0, 12345678919]));
 
@@ -1197,7 +1197,7 @@ mod test {
     }
 
     #[test]
-    fn test_add() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_add() -> Result<(), ParseUintError> {
         let a = U256::from_string("1245")?;
         let b = U256::from_string("4546477")?;
         let c = a + b;
@@ -1231,7 +1231,7 @@ mod test {
     }
 
     #[test]
-    fn test_sub() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_sub() -> Result<(), ParseUintError> {
         let a = U256::from_string("12131414122")?;
         let b = U256::from_string("4546477")?;
         let c = a - b;
@@ -1254,7 +1254,7 @@ mod test {
     }
 
     #[test]
-    fn test_mul_single() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_mul_single() -> Result<(), ParseUintError> {
         let a = U256::from_string("124312312142135")?;
         let b = 4546477;
         let c = a * b;
@@ -1277,7 +1277,7 @@ mod test {
     }
 
     #[test]
-    fn test_mul() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_mul() -> Result<(), ParseUintError> {
         let a = U256::from_string("1231242")?;
         let b = U256::from_string("42145124")?;
         let c = a * b;
@@ -1304,7 +1304,7 @@ mod test {
     }
 
     #[test]
-    fn test_shift_bits() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_shift_bits() -> Result<(), ParseUintError> {
         let mut a = U256::from_string("940899340494892899287232132141")?;
         a <<= 98;
 
@@ -1329,7 +1329,7 @@ mod test {
     }
 
     #[test]
-    fn test_div() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_div() -> Result<(), ParseUintError> {
         let a = U256::from_string("29408993404948928992877151431649155974")?;
         let b = 123456566;
         let c = a / b;
@@ -1362,7 +1362,7 @@ mod test {
     }
 
     #[test]
-    fn test_rem() -> Result<(), Box<dyn core::error::Error>> {
+    fn test_rem() -> Result<(), ParseUintError> {
         let a = U256::from_string("29408993404948928992877151431649155974")?;
         let b = 123456566;
         let c = a % b;
@@ -1384,13 +1384,12 @@ mod test {
 
         assert_eq!(
             c,
-            U256::from_string(
-                "361780925295470009804517438088754858207007846931619004104"
-            )?
+            "361780925295470009804517438088754858207007846931619004104"
+                .parse::<U256>()?
         );
 
-        let a = U256::from_string("1032105389620138683259824866402890871739720549422559896654845224087")?;
-        let b = U256::from_string("51248759832749832749873129879328147")?;
+        let a = "1032105389620138683259824866402890871739720549422559896654845224087".parse::<U256>()?;
+        let b = "51248759832749832749873129879328147".parse::<U256>()?;
         let c = a % b;
 
         assert_eq!(c.is_zero(), true);
