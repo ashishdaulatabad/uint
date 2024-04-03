@@ -1587,8 +1587,6 @@ impl core::ops::BitXorAssign<u64> for U512 {
 #[cfg(test)]
 mod test {
     use super::{count_bits, ParseUintError, U512};
-    extern crate alloc;
-    use alloc::boxed::Box;
 
     #[test]
     fn gen_test() -> Result<(), ParseUintError> {
