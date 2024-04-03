@@ -635,7 +635,7 @@ impl U256 {
         } else if self.0[0] > 0 {
             192 + self.0[0].trailing_zeros()
         } else {
-            0
+            256
         }
     }
 
@@ -659,7 +659,7 @@ impl U256 {
         } else if self.0[3] > 0 {
             192 + self.0[3].leading_zeros()
         } else {
-            0
+            256
         }
     }
 
