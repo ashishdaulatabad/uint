@@ -28,6 +28,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Switch
+      run: rustup default nightly
     - run: rustup component add clippy
     - uses: actions-rs/clippy-check@v1
       with:
