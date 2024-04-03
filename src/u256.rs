@@ -377,8 +377,8 @@ impl U256 {
                 Self::from(value_128)
             }
         } else {
-            let div = Self([0, 0, 0, divisor]);
-            let mut div_256 = Self([0, 0, 0, divisor]);
+            let div = Self::from(divisor);
+            let mut div_256 = Self::from(divisor);
             let leading_zeros = div.leading_zeros();
             div_256 <<= self.leading_zeros() - leading_zeros;
 
@@ -409,8 +409,8 @@ impl U256 {
                 Self::from(value_128)
             }
         } else {
-            let div = Self([0, 0, 0, divisor]);
-            let mut div_256 = Self([0, 0, 0, divisor]);
+            let div = Self::from(divisor);
+            let mut div_256 = Self::from(divisor);
             let leading_zeros = div.leading_zeros();
             div_256 <<= self.leading_zeros() - leading_zeros;
 
