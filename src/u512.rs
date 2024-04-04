@@ -1142,6 +1142,14 @@ impl core::str::FromStr for U512 {
     }
 }
 
+impl From<super::u256::U256> for U512 {
+    #[inline]
+    fn from(value: super::u256::U256) -> Self {
+        let val = value.get_raw();
+        Self([0, 0, 0, 0, val[0], val[1], val[2], val[3]])
+    }
+}
+
 impl From<u128> for U512 {
     #[inline]
     fn from(value: u128) -> Self {
@@ -1181,6 +1189,13 @@ impl From<U512> for u128 {
     #[inline]
     fn from(value: U512) -> Self {
         ((value.0[6] as u128) << 64) | (value.0[7] as u128)
+    }
+}
+
+impl From<U512> for super::u256::U256 {
+    #[inline]
+    fn from(value: U512) -> Self {
+        Self::raw([value.0[4], value.0[5], value.0[6], value.0[7]])
     }
 }
 
@@ -1591,8 +1606,8 @@ mod test {
         // Equal to 115792089237316195423570985008687907852837564279074904382605163141518161494337
         let value = U512::from_string("115792089237316195423570985008687907852837564279074904382605163141518161494337")?;
         assert_eq!(
-            value.0,
-            [
+            value,
+            U512([
                 0,
                 0,
                 0,
@@ -1601,13 +1616,13 @@ mod test {
                 18446744073709551614,
                 13451932020343611451,
                 13822214165235122497
-            ]
+            ])
         );
 
         let value = U512::from_string("16983810465656793445178183341822322175883642221536626637512293983324")?;
         assert_eq!(
-            value.0,
-            [
+            value,
+            U512([
                 0,
                 0,
                 0,
@@ -1616,14 +1631,14 @@ mod test {
                 0x4df099df30fc28a1,
                 0x69a467e9e47075a9,
                 0x0f7e650eb6b7a45c
-            ]
+            ])
         );
 
         // Max value of 256-bit number
         let value = U512::from_string("115792089237316195423570985008687907853269984665640564039457584007913129639935")?;
         assert_eq!(
-            value.0,
-            [
+            value,
+            U512([
                 0,
                 0,
                 0,
@@ -1632,7 +1647,7 @@ mod test {
                 0xFFFF_FFFF_FFFF_FFFF,
                 0xFFFF_FFFF_FFFF_FFFF,
                 0xFFFF_FFFF_FFFF_FFFF,
-            ]
+            ])
         );
 
         // Max value of 512-bit number
@@ -1760,9 +1775,7 @@ mod test {
 
         assert_eq!(
             c,
-            U512::from_string(
-                "6270385922947262222347954536162455298520515727022267860678267425509717888"
-            )?
+            "6270385922947262222347954536162455298520515727022267860678267425509717888".parse::<U512>()?
         );
 
         Ok(())

@@ -91,6 +91,11 @@ impl U256 {
         Self(value)
     }
 
+    /// Create raw value of unsigned integer
+    pub(super) fn get_raw(self) -> [u64; 4] {
+        self.0
+    }
+
     #[inline(always)]
     pub const fn raw_eq(self, other: [u64; 4]) -> bool {
         self.0[0] == other[0]
