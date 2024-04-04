@@ -169,7 +169,7 @@ impl U512 {
     pub fn from_string(string: &str) -> Result<Self, ParseUintError> {
         let mut value = U512::ZERO;
 
-        for chr in string.chars() {
+        for chr in string.chars().filter(|c| *c != '_') {
             let digit = chr.to_digit(10);
 
             if let Some(dig) = digit {
@@ -226,7 +226,7 @@ impl U512 {
             _ => 0,
         };
 
-        for chr in string.chars().skip(skip) {
+        for chr in string.chars().skip(skip).filter(|c| *c != '_') {
             let digit = chr.to_digit(radix);
 
             if let Some(dig) = digit {
@@ -1704,15 +1704,16 @@ mod test {
 
         // Finite Field for secp256k1 (2^256 - 2^32 - 2^9 - 2^8 - 2^7 - 2^6 - 2^4 - 1)
         // Source: https://en.bitcoin.it/wiki/Secp256k1
-        let p = U512::raw([0, 0, 0, 0, u64::MAX, u64::MAX, u64::MAX, u64::MAX])
+        let p = (U512::ONE << 256)
             - (U512::ONE << 32)
             - (U512::ONE << 9)
             - (U512::ONE << 8)
             - (U512::ONE << 7)
             - (U512::ONE << 6)
-            - (U512::ONE << 4);
+            - (U512::ONE << 4)
+            - U512::ONE;
 
-        assert_eq!(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".parse::<U512>()?);
+        assert_eq!(p, "0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFE_FFFF_FC2F".parse::<U512>()?);
 
         Ok(())
     }
