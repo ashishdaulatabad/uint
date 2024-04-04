@@ -45,6 +45,9 @@ pub enum ParseUintError {
     /// Occurence of an invalid character while parsing string
     #[non_exhaustive]
     InvalidDigit,
+    /// Occurence of an invalid character while parsing string
+    #[non_exhaustive]
+    InvalidRadix,
 }
 
 impl core::fmt::Display for ParseUintError {
@@ -57,9 +60,11 @@ impl core::error::Error for ParseUintError {
     fn description(&self) -> &str {
         match *self {
             Self::InvalidDigit => "invalid digit found while parsing integer",
+            Self::InvalidRadix => "invalid radix passed"
         }
     }
 }
 
 pub mod u256;
 pub mod u512;
+// pub mod uint;

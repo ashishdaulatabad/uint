@@ -223,7 +223,7 @@ impl U512 {
             2 => 1,
             8 => 3,
             16 => 4,
-            _ => 0,
+            _ => return Err(ParseUintError::InvalidRadix),
         };
 
         for chr in string.chars().skip(skip).filter(|c| *c != '_') {

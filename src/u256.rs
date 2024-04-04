@@ -175,7 +175,7 @@ impl U256 {
             2 => 1,
             8 => 3,
             16 => 4,
-            _ => 0,
+            _ => return Err(ParseUintError::InvalidRadix),
         };
 
         for chr in string.chars().skip(skip).filter(|c| *c != '_') {
@@ -720,21 +720,6 @@ impl core::cmp::PartialOrd for U256 {
     }
 }
 
-impl core::ops::Neg for U256 {
-    type Output = U256;
-
-    #[inline]
-    fn neg(self) -> Self::Output {
-        let mut arr = [!self.0[0], !self.0[1], !self.0[2], !self.0[3]];
-        arr[3] = arr[3].wrapping_add(1);
-        arr[2] = arr[2].wrapping_add((arr[3] < !self.0[3]).then_val(1, 0));
-        arr[1] = arr[1].wrapping_add((arr[2] < !self.0[2]).then_val(1, 0));
-        arr[0] = arr[0].wrapping_add((arr[1] < !self.0[1]).then_val(1, 0));
-
-        Self(arr)
-    }
-}
-
 impl core::str::FromStr for U256 {
     type Err = ParseUintError;
 
@@ -1123,24 +1108,24 @@ mod test {
         // Equal to 115792089237316195423570985008687907852837564279074904382605163141518161494337
         let value = U256::from_string("115792089237316195423570985008687907852837564279074904382605163141518161494337")?;
         assert_eq!(
-            value.0,
-            [
+            value,
+            U256([
                 18446744073709551615,
                 18446744073709551614,
                 13451932020343611451,
                 13822214165235122497
-            ]
+            ])
         );
 
         let value = U256::from_string("16983810465656793445178183341822322175883642221536626637512293983324")?;
         assert_eq!(
-            value.0,
-            [
+            value,
+            U256([
                 0xa1455b33,
                 0x4df099df30fc28a1,
                 0x69a467e9e47075a9,
                 0x0f7e650eb6b7a45c
-            ]
+            ])
         );
 
         // Max value of 256-bit number
