@@ -122,7 +122,7 @@ impl U256 {
     pub fn from_string(string: &str) -> Result<Self, ParseUintError> {
         let mut value = U256::ZERO;
 
-        for chr in string.chars() {
+        for chr in string.chars().filter(|c| *c != '_') {
             let digit = chr.to_digit(10);
             if let Some(dig) = digit {
                 let (value_x_8, value_x_2) = (value << 3, value << 1);
@@ -178,7 +178,7 @@ impl U256 {
             _ => 0,
         };
 
-        for chr in string.chars().skip(skip) {
+        for chr in string.chars().skip(skip).filter(|c| *c != '_') {
             let digit = chr.to_digit(radix);
 
             if let Some(dig) = digit {
