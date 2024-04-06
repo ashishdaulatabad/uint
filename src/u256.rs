@@ -4,6 +4,21 @@ use super::{count_bits, ParseUintError, ThenOr};
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U256([u64; 4]);
 
+impl core::fmt::Display for U256 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = self
+            .display_values()
+            .iter()
+            .enumerate()
+            .rev()
+            .map(|(index, c)| if index > 0 { format!("{}", c) } else { format!("{:019}", c) })
+            .collect::<Vec<String>>()
+            .join("");
+        f.write_fmt(format_args!("{}", s))
+    }
+}
+
+
 impl core::fmt::LowerHex for U256 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         if self.0[0] > 0 {
@@ -356,7 +371,32 @@ impl U256 {
                 divisor <<= leading_zeros - self.leading_zeros();
 
                 let mut value = self;
-                let mut quotient = Self::MIN;
+
+                while value >= div {
+                    while value < divisor {
+                        divisor >>= 1;
+                    }
+
+                    value -= divisor;
+                }
+
+                value
+            }
+        }
+    }
+
+    fn div_rem_internal(self, other: Self) -> (Self, Self) {
+        match self.cmp(&other) {
+            core::cmp::Ordering::Less => (Self::ZERO, self),
+            core::cmp::Ordering::Equal => (Self::ONE, Self::ZERO),
+            _ => {
+                let div = other;
+                let mut divisor = other;
+                let leading_zeros = divisor.leading_zeros();
+                divisor <<= leading_zeros - self.leading_zeros();
+
+                let mut value = self;
+                let mut quotient = Self::ZERO;
 
                 while value >= div {
                     while value < divisor {
@@ -367,10 +407,24 @@ impl U256 {
                     value -= divisor;
                     quotient = quotient.add_single(1);
                 }
+                let rem_offset = div.leading_zeros() - divisor.leading_zeros();
 
-                value
+                (quotient << rem_offset, value)
             }
         }
+    }
+
+    fn display_values(self) -> Vec<u64> {
+        let divisor = Self::from(1_000_000_000_000_000_000_u64);
+        let mut value = self;
+        let mut values = vec![];
+        while !value.is_zero() {
+            let (q, rem) = value.div_rem_internal(divisor);
+            value = q;
+            values.push(rem.0[7]);
+        }
+
+        values
     }
 
     pub fn div_single(self, divisor: u64) -> Self {

@@ -4,11 +4,25 @@ use super::{count_bits, ParseUintError, ThenOr};
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U512([u64; 8]);
 
+impl core::fmt::Display for U512 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = self
+            .display_values()
+            .iter()
+            .enumerate()
+            .rev()
+            .map(|(index, c)| if index > 0 { format!("{}", c) } else { format!("{:019}", c) })
+            .collect::<Vec<String>>()
+            .join("");
+        f.write_fmt(format_args!("{}", s))
+    }
+}
+
 impl core::fmt::LowerHex for U512 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         if self.0[0] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}{:064x}{:064x}{:064x}{:064x}{:064x}",
+                "0x{:x}{:016x}{:016x}{:016x}{:016x}{:016x}{:016x}{:016x}",
                 self.0[0],
                 self.0[1],
                 self.0[2],
@@ -20,7 +34,7 @@ impl core::fmt::LowerHex for U512 {
             ))
         } else if self.0[1] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}{:064x}{:064x}{:064x}{:064x}",
+                "0x{:x}{:016x}{:016x}{:016x}{:016x}{:016x}{:016x}",
                 self.0[1],
                 self.0[2],
                 self.0[3],
@@ -31,7 +45,7 @@ impl core::fmt::LowerHex for U512 {
             ))
         } else if self.0[2] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}{:064x}{:064x}{:064x}",
+                "0x{:x}{:016x}{:016x}{:016x}{:016x}{:016x}",
                 self.0[2],
                 self.0[3],
                 self.0[4],
@@ -41,23 +55,23 @@ impl core::fmt::LowerHex for U512 {
             ))
         } else if self.0[3] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}{:064x}{:064x}",
+                "0x{:x}{:016x}{:016x}{:016x}{:016x}",
                 self.0[3], self.0[4], self.0[5], self.0[6], self.0[7]
             ))
         } else if self.0[4] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}{:064x}",
+                "0x{:x}{:016x}{:016x}{:016x}",
                 self.0[4], self.0[5], self.0[6], self.0[7]
             ))
         } else if self.0[5] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}",
+                "0x{:x}{:016x}{:016x}",
                 self.0[5], self.0[6], self.0[7]
             ))
         } else if self.0[6] > 0 {
-            f.write_fmt(format_args!("{:x}{:064x}", self.0[6], self.0[7]))
+            f.write_fmt(format_args!("0x{:x}{:016x}", self.0[6], self.0[7]))
         } else {
-            f.write_fmt(format_args!("{:x}", self.0[7]))
+            f.write_fmt(format_args!("0x{:x}", self.0[7]))
         }
     }
 }
@@ -66,7 +80,7 @@ impl core::fmt::UpperHex for U512 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         if self.0[0] > 0 {
             f.write_fmt(format_args!(
-                "{:X}{:064X}{:064X}{:064X}{:064X}{:064X}{:064X}{:064X}",
+                "0x{:X}{:016X}{:016X}{:016X}{:016X}{:016X}{:016X}{:016X}",
                 self.0[0],
                 self.0[1],
                 self.0[2],
@@ -78,7 +92,7 @@ impl core::fmt::UpperHex for U512 {
             ))
         } else if self.0[1] > 0 {
             f.write_fmt(format_args!(
-                "{:X}{:064X}{:064X}{:064X}{:064X}{:064X}{:064X}",
+                "0x{:X}{:016X}{:016X}{:016X}{:016X}{:016X}{:016X}",
                 self.0[1],
                 self.0[2],
                 self.0[3],
@@ -89,7 +103,7 @@ impl core::fmt::UpperHex for U512 {
             ))
         } else if self.0[2] > 0 {
             f.write_fmt(format_args!(
-                "{:X}{:064X}{:064X}{:064X}{:064X}{:064X}",
+                "0x{:X}{:016X}{:016X}{:016X}{:016X}{:016X}",
                 self.0[2],
                 self.0[3],
                 self.0[4],
@@ -99,23 +113,23 @@ impl core::fmt::UpperHex for U512 {
             ))
         } else if self.0[3] > 0 {
             f.write_fmt(format_args!(
-                "{:X}{:064X}{:064X}{:064X}{:064X}",
+                "0x{:X}{:016X}{:016X}{:016X}{:016X}",
                 self.0[3], self.0[4], self.0[5], self.0[6], self.0[7]
             ))
         } else if self.0[4] > 0 {
             f.write_fmt(format_args!(
-                "{:X}{:064X}{:064X}{:064X}",
+                "0x{:X}{:016X}{:016X}{:016X}",
                 self.0[4], self.0[5], self.0[6], self.0[7]
             ))
         } else if self.0[5] > 0 {
             f.write_fmt(format_args!(
-                "{:X}{:064X}{:064X}",
+                "0x{:X}{:016X}{:016X}",
                 self.0[5], self.0[6], self.0[7]
             ))
         } else if self.0[6] > 0 {
-            f.write_fmt(format_args!("{:X}{:064X}", self.0[6], self.0[7]))
+            f.write_fmt(format_args!("0x{:X}{:016X}", self.0[6], self.0[7]))
         } else {
-            f.write_fmt(format_args!("{:X}", self.0[7]))
+            f.write_fmt(format_args!("0x{:X}", self.0[7]))
         }
     }
 }
@@ -431,6 +445,31 @@ impl U512 {
                 divisor <<= leading_zeros - self.leading_zeros();
 
                 let mut value = self;
+
+                while value >= div {
+                    while value < divisor {
+                        divisor >>= 1;
+                    }
+
+                    value -= divisor;
+                }
+
+                value
+            }
+        }
+    }
+
+    fn div_rem_internal(self, other: Self) -> (Self, Self) {
+        match self.cmp(&other) {
+            core::cmp::Ordering::Less => (Self::ZERO, self),
+            core::cmp::Ordering::Equal => (Self::ONE, Self::ZERO),
+            _ => {
+                let div = other;
+                let mut divisor = other;
+                let leading_zeros = divisor.leading_zeros();
+                divisor <<= leading_zeros - self.leading_zeros();
+
+                let mut value = self;
                 let mut quotient = Self::ZERO;
 
                 while value >= div {
@@ -442,10 +481,29 @@ impl U512 {
                     value -= divisor;
                     quotient = quotient.add_single(1);
                 }
+                let rem_offset = div.leading_zeros() - divisor.leading_zeros();
 
-                value
+                (quotient << rem_offset, value)
             }
         }
+    }
+
+    fn display_values(self) -> Vec<u64> {
+        let divisor = Self::from(10_000_000_000_000_000_000_u64);
+        let mut value = self;
+        let mut values = vec![];
+        loop {
+            let (q, rem) = value.div_rem_internal(divisor);
+            value = q;
+            values.push(rem.0[7]);
+
+            if q.is_zero() {
+                break;
+            }
+        }
+
+        println!("{:?}", values);
+        values
     }
 
     pub fn div_single(self, divisor: u64) -> Self {
@@ -1730,6 +1788,20 @@ mod test {
 
         assert_eq!(p, "0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFE_FFFF_FC2F".parse::<U512>()?);
 
+        Ok(())
+    }
+
+    #[test]
+    fn test_format() -> Result<(), ParseUintError> {
+        let p = "231242904832985791475347973284762319417543905832485934759832598346782893471290".parse::<U512>()?;
+        assert_eq!(
+            format!("{}", p),
+            "231242904832985791475347973284762319417543905832485934759832598346782893471290"
+        );
+        assert_eq!(
+            format!("{:x}", p),
+            "0x1ff3ed89117e70e5eebcefe04bc75a8fa9ca86dbaa1dd29d762541238963cf63a"
+        );
         Ok(())
     }
 
