@@ -1257,31 +1257,31 @@ impl From<U512> for super::u256::U256 {
     }
 }
 
-impl Into<u64> for U512 {
+impl From<U512> for u64 {
     #[inline]
-    fn into(self) -> u64 {
-        self.0[7]
+    fn from(value: U512) -> u64 {
+        value.0[7]
     }
 }
 
-impl Into<u32> for U512 {
+impl From<U512> for u32 {
     #[inline]
-    fn into(self) -> u32 {
-        self.0[7] as u32
+    fn from(value: U512) -> u32 {
+        value.0[7] as u32
     }
 }
 
-impl Into<u16> for U512 {
+impl From<U512> for u16 {
     #[inline]
-    fn into(self) -> u16 {
-        self.0[7] as u16
+    fn from(value: U512) -> u16 {
+        value.0[7] as u16
     }
 }
 
-impl Into<u8> for U512 {
+impl From<U512> for u8 {
     #[inline]
-    fn into(self) -> u8 {
-        self.0[7] as u8
+    fn from(value: U512) -> u8 {
+        value.0[7] as u8
     }
 }
 

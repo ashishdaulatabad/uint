@@ -418,10 +418,11 @@ impl U256 {
         let divisor = Self::from(1_000_000_000_000_000_000_u64);
         let mut value = self;
         let mut values = vec![];
+    
         while !value.is_zero() {
             let (q, rem) = value.div_rem_internal(divisor);
             value = q;
-            values.push(rem.0[7]);
+            values.push(rem.0[3]);
         }
 
         values
@@ -833,31 +834,31 @@ impl From<U256> for u128 {
     }
 }
 
-impl Into<u64> for U256 {
+impl From<U256> for u64 {
     #[inline]
-    fn into(self) -> u64 {
-        self.0[3]
+    fn from(value: U256) -> u64 {
+        value.0[3]
     }
 }
 
-impl Into<u32> for U256 {
+impl From<U256> for u32 {
     #[inline]
-    fn into(self) -> u32 {
-        self.0[3] as u32
+    fn from(value: U256) -> u32 {
+        value.0[3] as u32
     }
 }
 
-impl Into<u16> for U256 {
+impl From<U256> for u16 {
     #[inline]
-    fn into(self) -> u16 {
-        self.0[3] as u16
+    fn from(value: U256) -> u16 {
+        value.0[3] as u16
     }
 }
 
-impl Into<u8> for U256 {
+impl From<U256> for u8 {
     #[inline]
-    fn into(self) -> u8 {
-        self.0[3] as u8
+    fn from(value: U256) -> u8 {
+        value.0[3] as u8
     }
 }
 
