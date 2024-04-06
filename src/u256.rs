@@ -23,16 +23,16 @@ impl core::fmt::LowerHex for U256 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         if self.0[0] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}{:064x}",
+                "{:x}{:016x}{:016x}{:016x}",
                 self.0[0], self.0[1], self.0[2], self.0[3]
             ))
         } else if self.0[1] > 0 {
             f.write_fmt(format_args!(
-                "{:x}{:064x}{:064x}",
+                "{:x}{:016x}{:016x}",
                 self.0[1], self.0[2], self.0[3]
             ))
         } else if self.0[2] > 0 {
-            f.write_fmt(format_args!("{:x}{:064x}", self.0[2], self.0[3]))
+            f.write_fmt(format_args!("{:x}{:016x}", self.0[2], self.0[3]))
         } else {
             f.write_fmt(format_args!("{:x}", self.0[3]))
         }
