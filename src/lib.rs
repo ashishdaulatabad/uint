@@ -1,7 +1,5 @@
-// #![feature(error_in_core)]
-// #![no_std]
-
 trait ThenOr {
+    #[allow(unused)]
     fn then_or<T, B, Result>(self, fn1: T, fn2: B) -> Result
     where
         T: Fn() -> Result,

@@ -5,7 +5,7 @@ use super::{count_bits, ParseUintError, ThenOr};
 pub struct U256([u64; 4]);
 
 impl core::fmt::Display for U256 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> core::fmt::Result {
         let s = self
             .display_values()
             .iter()
