@@ -11,7 +11,13 @@ impl core::fmt::Display for U512 {
             .iter()
             .enumerate()
             .rev()
-            .map(|(index, c)| if index > 0 { format!("{}", c) } else { format!("{:019}", c) })
+            .map(|(index, c)| {
+                if index > 0 {
+                    format!("{}", c)
+                } else {
+                    format!("{:019}", c)
+                }
+            })
             .collect::<Vec<String>>()
             .join("");
         f.write_fmt(format_args!("{}", s))
@@ -502,7 +508,6 @@ impl U512 {
             }
         }
 
-        println!("{:?}", values);
         values
     }
 

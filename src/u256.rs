@@ -11,13 +11,18 @@ impl core::fmt::Display for U256 {
             .iter()
             .enumerate()
             .rev()
-            .map(|(index, c)| if index > 0 { format!("{}", c) } else { format!("{:019}", c) })
+            .map(|(index, c)| {
+                if index > 0 {
+                    format!("{}", c)
+                } else {
+                    format!("{:019}", c)
+                }
+            })
             .collect::<Vec<String>>()
             .join("");
         f.write_fmt(format_args!("{}", s))
     }
 }
-
 
 impl core::fmt::LowerHex for U256 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -418,7 +423,7 @@ impl U256 {
         let divisor = Self::from(1_000_000_000_000_000_000_u64);
         let mut value = self;
         let mut values = vec![];
-    
+
         while !value.is_zero() {
             let (q, rem) = value.div_rem_internal(divisor);
             value = q;
@@ -1201,31 +1206,12 @@ mod test {
         let a = U256::from_string("1245")?;
         let b = U256::from_string("4546477")?;
         let c = a + b;
-
         assert_eq!(c.0, U256::from_string("4547722")?.0);
 
-        let a = U256::raw([
-            0,
-            0xFFFF_FFFF_FFFF_FFFF,
-            0xFFFF_FFFF_FFFF_FFFF,
-            0xFFFF_FFFF_FFFF_FFFF,
-        ]);
-        let b = U256::raw([
-            0,
-            0xFFFF_FFFF_FFFF_FFFF,
-            0xFFFF_FFFF_FFFF_FFFF,
-            0xFFFF_FFFF_FFFF_FFFF,
-        ]);
+        let a = (U256::ONE << 192) - U256::ONE;
+        let b = (U256::ONE << 192) - U256::ONE;
         let c = a + b;
-        assert_eq!(
-            c,
-            U256([
-                0x1,
-                0xFFFF_FFFF_FFFF_FFFF,
-                0xFFFF_FFFF_FFFF_FFFF,
-                0xFFFF_FFFF_FFFF_FFFE
-            ])
-        );
+        assert_eq!(c, (U256::ONE << 193) - (U256::ONE << 1));
 
         Ok(())
     }
