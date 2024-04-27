@@ -9,13 +9,13 @@ impl core::fmt::Display for U512 {
         let s = self
             .display_values()
             .iter()
-            .enumerate()
             .rev()
+            .enumerate()
             .map(|(index, c)| {
-                if index > 0 {
+                if index == 0 {
                     format!("{}", c)
                 } else {
-                    format!("{:019}", c)
+                    format!("{:018}", c)
                 }
             })
             .collect::<Vec<String>>()
@@ -1724,6 +1724,18 @@ mod test {
     fn test_bits() {
         assert_eq!(count_bits(0b01011100), 4);
         assert_eq!(count_bits(0b01_1100_1111_0011_1110_1001), 14);
+    }
+
+
+    #[test]
+    fn test_fmt() -> Result<(), Box<dyn std::error::Error>> {
+        let num = "3912093812908391208428194902184908123982189742178629873982173391238912122312".parse::<U512>()?;
+
+        assert_eq!(
+            format!("{}", num),
+            "3912093812908391208428194902184908123982189742178629873982173391238912122312"
+        );
+        Ok(())
     }
 
     #[test]
