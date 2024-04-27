@@ -15,7 +15,7 @@ impl core::fmt::Display for U256 {
                 if index > 0 {
                     format!("{}", c)
                 } else {
-                    format!("{:019}", c)
+                    format!("{:018}", c)
                 }
             })
             .collect::<Vec<String>>()
@@ -873,6 +873,15 @@ impl core::ops::Add<U256> for U256 {
     #[inline(always)]
     fn add(self, rhs: U256) -> Self::Output {
         self.add_internal(rhs)
+    }
+}
+
+impl core::ops::Add<u64> for U256 {
+    type Output = U256;
+
+    #[inline(always)]
+    fn add(self, rhs: u64) -> Self::Output {
+        self.add_single(rhs)
     }
 }
 
