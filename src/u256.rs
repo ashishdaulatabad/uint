@@ -212,28 +212,17 @@ impl U256 {
         Ok(value)
     }
 
+    #[inline]
     fn add_internal(self, other: Self) -> Self {
-        let mut arr = [0; 4];
+        let (mut arr, mut index) = ([0; 4], 3);
+        let (mut carry, mut is_overflown) = (0, false);
 
-        arr[3] = self.0[3].wrapping_add(other.0[3]);
-        arr[2] = self.0[2].wrapping_add(other.0[2]);
-        arr[1] = self.0[1].wrapping_add(other.0[1]);
-        arr[0] = self.0[0].wrapping_add(other.0[0]);
-
-        let (arr2_temp, arr1_temp, arr0_temp) = (
-            arr[2].wrapping_add((arr[3] < self.0[3]).then_val(1, 0)),
-            arr[1].wrapping_add((arr[2] < self.0[2]).then_val(1, 0)),
-            arr[0].wrapping_add((arr[1] < self.0[1]).then_val(1, 0)),
-        );
-
-        let (carry_add1, carry_add0) = (
-            arr1_temp.wrapping_add((arr2_temp < arr[2]).then_val(1, 0)),
-            arr0_temp.wrapping_add((arr1_temp < arr[1]).then_val(1, 0)),
-        );
-
-        let final_0 =
-            carry_add0.wrapping_add((carry_add1 < arr1_temp).then_val(1, 0));
-        (arr[2], arr[1], arr[0]) = (arr2_temp, carry_add1, final_0);
+        while !is_overflown {
+            let value = self.0[index] as u128 + other.0[index] as u128 + carry;
+            arr[index] = value as u64;
+            carry = value >> 64;
+            (index, is_overflown) = index.overflowing_sub(1);
+        }
 
         Self(arr)
     }

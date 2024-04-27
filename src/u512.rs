@@ -260,94 +260,18 @@ impl U512 {
         Ok(value)
     }
 
+    
+    #[inline]
     fn add_internal(self, other: Self) -> Self {
-        let mut arr = [0; 8];
+        let (mut arr, mut index) = ([0; 8], 7);
+        let (mut carry, mut is_overflown) = (0, false);
 
-        arr[7] = self.0[7].wrapping_add(other.0[7]);
-        arr[6] = self.0[6].wrapping_add(other.0[6]);
-        arr[5] = self.0[5].wrapping_add(other.0[5]);
-        arr[4] = self.0[4].wrapping_add(other.0[4]);
-        arr[3] = self.0[3].wrapping_add(other.0[3]);
-        arr[2] = self.0[2].wrapping_add(other.0[2]);
-        arr[1] = self.0[1].wrapping_add(other.0[1]);
-        arr[0] = self.0[0].wrapping_add(other.0[0]);
-
-        let (
-            arr6_temp,
-            arr5_temp,
-            arr4_temp,
-            arr3_temp,
-            arr2_temp,
-            arr1_temp,
-            arr0_temp,
-        ) = (
-            arr[6].wrapping_add((arr[7] < self.0[7]).then_val(1, 0)),
-            arr[5].wrapping_add((arr[6] < self.0[6]).then_val(1, 0)),
-            arr[4].wrapping_add((arr[5] < self.0[5]).then_val(1, 0)),
-            arr[3].wrapping_add((arr[4] < self.0[4]).then_val(1, 0)),
-            arr[2].wrapping_add((arr[3] < self.0[3]).then_val(1, 0)),
-            arr[1].wrapping_add((arr[2] < self.0[2]).then_val(1, 0)),
-            arr[0].wrapping_add((arr[1] < self.0[1]).then_val(1, 0)),
-        );
-
-        let (
-            carry_add5,
-            carry_add4,
-            carry_add3,
-            carry_add2,
-            carry_add1,
-            carry_add0,
-        ) = (
-            arr5_temp.wrapping_add((arr6_temp < arr[6]).then_val(1, 0)),
-            arr4_temp.wrapping_add((arr5_temp < arr[5]).then_val(1, 0)),
-            arr3_temp.wrapping_add((arr4_temp < arr[4]).then_val(1, 0)),
-            arr2_temp.wrapping_add((arr3_temp < arr[3]).then_val(1, 0)),
-            arr1_temp.wrapping_add((arr2_temp < arr[2]).then_val(1, 0)),
-            arr0_temp.wrapping_add((arr1_temp < arr[1]).then_val(1, 0)),
-        );
-
-        let (acarry_add4, acarry_add3, acarry_add2, acarry_add1, acarry_add0) = (
-            carry_add4.wrapping_add((carry_add5 < arr5_temp).then_val(1, 0)),
-            carry_add3.wrapping_add((carry_add4 < arr4_temp).then_val(1, 0)),
-            carry_add2.wrapping_add((carry_add3 < arr3_temp).then_val(1, 0)),
-            carry_add1.wrapping_add((carry_add2 < arr2_temp).then_val(1, 0)),
-            carry_add0.wrapping_add((carry_add1 < arr1_temp).then_val(1, 0)),
-        );
-
-        let (an_carry_add3, an_carry_add2, an_carry_add1, an_carry_add0) = (
-            acarry_add3.wrapping_add((acarry_add4 < carry_add4).then_val(1, 0)),
-            acarry_add2.wrapping_add((acarry_add3 < carry_add3).then_val(1, 0)),
-            acarry_add1.wrapping_add((acarry_add2 < carry_add2).then_val(1, 0)),
-            acarry_add0.wrapping_add((acarry_add1 < carry_add1).then_val(1, 0)),
-        );
-
-        let (ano_carry_add2, ano_carry_add1, ano_carry_add0) = (
-            an_carry_add2
-                .wrapping_add((an_carry_add3 < acarry_add3).then_val(1, 0)),
-            an_carry_add1
-                .wrapping_add((an_carry_add2 < acarry_add2).then_val(1, 0)),
-            an_carry_add0
-                .wrapping_add((an_carry_add1 < acarry_add1).then_val(1, 0)),
-        );
-
-        let (anof_carry_add1, anof_carry_add0) = (
-            ano_carry_add1
-                .wrapping_add((ano_carry_add2 < an_carry_add2).then_val(1, 0)),
-            ano_carry_add0
-                .wrapping_add((ano_carry_add1 < an_carry_add1).then_val(1, 0)),
-        );
-
-        let final_0 = anof_carry_add0
-            .wrapping_add((anof_carry_add1 < ano_carry_add1).then_val(1, 0));
-        (arr[6], arr[5], arr[4], arr[3], arr[2], arr[1], arr[0]) = (
-            arr6_temp,
-            carry_add5,
-            acarry_add4,
-            an_carry_add3,
-            ano_carry_add2,
-            anof_carry_add1,
-            final_0,
-        );
+        while !is_overflown {
+            let value = self.0[index] as u128 + other.0[index] as u128 + carry;
+            arr[index] = value as u64;
+            carry = value >> 64;
+            (index, is_overflown) = index.overflowing_sub(1);
+        }
 
         Self(arr)
     }
