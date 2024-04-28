@@ -532,8 +532,9 @@ impl U256 {
         Self(answer)
     }
 
+    /// Subtracting using 2's complement
     #[inline(always)]
-    pub fn sub_internal(self, other: Self) -> Self {
+    fn sub_internal(self, other: Self) -> Self {
         self + (!other + U256::ONE)
     }
 

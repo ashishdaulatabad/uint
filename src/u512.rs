@@ -574,31 +574,9 @@ impl U512 {
         Self(answer)
     }
 
-    // #[inline]
-    // fn mul_internal(self, other: U512) -> Self {
-    //     // Multiply first half and second half
-    //     let first = self.mul_single_other(other.0[7]);
-    //     let second = self.mul_single_other(other.0[6]);
-    //     let third = self.mul_single_other(other.0[5]);
-    //     let fourth = self.mul_single_other(other.0[4]);
-
-    //     let fifth = self.mul_single_other(other.0[3]);
-    //     let sixth = self.mul_single_other(other.0[2]);
-    //     let seventh = self.mul_single_other(other.0[1]);
-    //     let eighth = self.mul_single_other(other.0[0]);
-
-    //     (first)
-    //         + (second << 64)
-    //         + (third << 128)
-    //         + (fourth << 192)
-    //         + (fifth << 256)
-    //         + (sixth << 320)
-    //         + (seventh << 384)
-    //         + (eighth << 448)
-    // }
-
+    /// Subtracting number using 2's complement
     #[inline(always)]
-    pub fn sub_internal(self, other: Self) -> Self {
+    fn sub_internal(self, other: Self) -> Self {
         self + (!other + U512::ONE)
     }
 
