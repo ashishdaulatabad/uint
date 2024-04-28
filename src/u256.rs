@@ -438,7 +438,7 @@ impl U256 {
             if self.0[2] == 0 {
                 Self::from(self.0[3] / divisor)
             } else {
-                let value_128 = Into::<u128>::into(self) / (divisor as u128);
+                let value_128 = u128::from(self) / u128::from(divisor);
                 Self::from(value_128)
             }
         } else {
@@ -470,7 +470,7 @@ impl U256 {
             if self.0[2] == 0 {
                 Self::from(self.0[3] % divisor)
             } else {
-                let value_128 = Into::<u128>::into(self) % (divisor as u128);
+                let value_128 = u128::from(self) % u128::from(divisor);
                 Self::from(value_128)
             }
         } else {
@@ -478,18 +478,14 @@ impl U256 {
             let mut div_256 = Self::from(divisor);
             let leading_zeros = div.leading_zeros();
             div_256 <<= self.leading_zeros() - leading_zeros;
-
             let mut value = self;
-            let mut quotient = U256::ZERO;
 
             while value >= div {
                 while value < div_256 {
                     div_256 >>= 1;
-                    quotient <<= 1;
                 }
 
                 value -= div_256;
-                quotient = quotient.add_single(1);
             }
 
             value
@@ -501,7 +497,7 @@ impl U256 {
         (u128::from(a) * u128::from(b) + u128::from(c)).split()
     }
 
-    #[inline(always)]
+    #[inline]
     fn mul_internal(self, other: U256) -> Self {
         let mut answer: [u64; 4] = [0; 4];
 
@@ -1224,6 +1220,13 @@ mod test {
             format!("{}", num),
             "3912093812908391208428194902184908123982189742178629873982173391238912122312"
         );
+        let num = "1213232142132321321".parse::<U256>()?;
+
+        assert_eq!(
+            format!("{}", num),
+            "1213232142132321321"
+        );
+
         Ok(())
     }
 
@@ -1253,12 +1256,12 @@ mod test {
         // Finite Field for secp256k1 (2^256 - 2^32 - 2^9 - 2^8 - 2^7 - 2^6 - 2^4 - 1)
         // Source: https://en.bitcoin.it/wiki/Secp256k1
         let p = U256::MAX
-            - (U256::ONE << 32)
-            - (U256::ONE << 9)
-            - (U256::ONE << 8)
-            - (U256::ONE << 7)
-            - (U256::ONE << 6)
-            - (U256::ONE << 4);
+            ^ (U256::ONE << 32)
+            ^ (U256::ONE << 9)
+            ^ (U256::ONE << 8)
+            ^ (U256::ONE << 7)
+            ^ (U256::ONE << 6)
+            ^ (U256::ONE << 4);
 
         assert_eq!(p, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".parse::<U256>()?);
 

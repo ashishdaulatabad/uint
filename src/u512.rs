@@ -487,7 +487,7 @@ impl U512 {
         (u128::from(a) * u128::from(b) + u128::from(c)).split()
     }
 
-    #[inline(always)]
+    #[inline]
     fn mul_internal(self, other: U512) -> Self {
         let mut answer: [u64; 8] = [0; 8];
 
