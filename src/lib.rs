@@ -63,6 +63,10 @@ impl std::error::Error for ParseUintError {
     }
 }
 
+trait Split {
+    fn split(self) -> (u64, u64);
+}
+
 pub mod u256;
 pub mod u512;
 // pub mod uint;

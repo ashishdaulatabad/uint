@@ -1,3 +1,5 @@
+use crate::Split;
+
 use super::{count_bits, ParseUintError, ThenOr};
 
 /// An extended 64-byte (or 512-bit) unsigned integer
@@ -480,120 +482,124 @@ impl U512 {
         value
     }
 
-    #[inline]
-    fn mul_internal(self, other: U512) -> Self {
-        // Multiply first half and second half
-        let first = self.mul_single_other(other.0[7]);
-        let second = self.mul_single_other(other.0[6]);
-        let third = self.mul_single_other(other.0[5]);
-        let fourth = self.mul_single_other(other.0[4]);
-
-        let fifth = self.mul_single_other(other.0[3]);
-        let sixth = self.mul_single_other(other.0[2]);
-        let seventh = self.mul_single_other(other.0[1]);
-        let eighth = self.mul_single_other(other.0[0]);
-
-        (first)
-            + (second << 64)
-            + (third << 128)
-            + (fourth << 192)
-            + (fifth << 256)
-            + (sixth << 320)
-            + (seventh << 384)
-            + (eighth << 448)
+    #[inline(always)]
+    fn madd_split(a: u64, b: u64, c: u64) -> (u64, u64) {
+        (u128::from(a) * u128::from(b) + u128::from(c)).split()
     }
 
+    #[inline(always)]
+    fn mul_internal(self, other: U512) -> Self {
+        let mut answer: [u64; 8] = [0; 8];
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[7], 0);
+        answer[7] = answer[7].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[6], other.0[7], hcarry);
+        answer[6] = answer[6].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[5], other.0[7], hcarry);
+        answer[5] = answer[5].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[4], other.0[7], hcarry);
+        answer[4] = answer[4].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[3], other.0[7], hcarry);
+        answer[3] = answer[3].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[2], other.0[7], hcarry);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[1], other.0[7], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[0], other.0[7], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[6], 0);
+        answer[6] = answer[6].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[6], other.0[6], hcarry);
+        answer[5] = answer[5].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[5], other.0[6], hcarry);
+        answer[4] = answer[4].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[4], other.0[6], hcarry);
+        answer[3] = answer[3].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[3], other.0[6], hcarry);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[2], other.0[6], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[1], other.0[6], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+        
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[5], 0);
+        answer[5] = answer[5].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[6], other.0[5], hcarry);
+        answer[4] = answer[4].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[5], other.0[5], hcarry);
+        answer[3] = answer[3].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[4], other.0[5], hcarry);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[3], other.0[5], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[2], other.0[5], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[4], 0);
+        answer[4] = answer[4].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[6], other.0[4], hcarry);
+        answer[3] = answer[3].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[5], other.0[4], hcarry);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[4], other.0[4], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[3], other.0[4], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[3], 0);
+        answer[3] = answer[3].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[6], other.0[3], hcarry);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[5], other.0[3], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[4], other.0[3], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[2], 0);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[6], other.0[2], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[5], other.0[2], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+        
+        let (hcarry, lcarry) = Self::madd_split(self.0[7], other.0[1], 0);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[6], other.0[1], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (_, lcarry) = Self::madd_split(self.0[7], other.0[0], 0);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        Self(answer)
+    }
+
+    // #[inline]
+    // fn mul_internal(self, other: U512) -> Self {
+    //     // Multiply first half and second half
+    //     let first = self.mul_single_other(other.0[7]);
+    //     let second = self.mul_single_other(other.0[6]);
+    //     let third = self.mul_single_other(other.0[5]);
+    //     let fourth = self.mul_single_other(other.0[4]);
+
+    //     let fifth = self.mul_single_other(other.0[3]);
+    //     let sixth = self.mul_single_other(other.0[2]);
+    //     let seventh = self.mul_single_other(other.0[1]);
+    //     let eighth = self.mul_single_other(other.0[0]);
+
+    //     (first)
+    //         + (second << 64)
+    //         + (third << 128)
+    //         + (fourth << 192)
+    //         + (fifth << 256)
+    //         + (sixth << 320)
+    //         + (seventh << 384)
+    //         + (eighth << 448)
+    // }
+
+    #[inline(always)]
     pub fn sub_internal(self, other: Self) -> Self {
-        let mut arr = [0; 8];
-
-        arr[7] = self.0[7].wrapping_sub(other.0[7]);
-        arr[6] = self.0[6].wrapping_sub(other.0[6]);
-        arr[5] = self.0[5].wrapping_sub(other.0[5]);
-        arr[4] = self.0[4].wrapping_sub(other.0[4]);
-        arr[3] = self.0[3].wrapping_sub(other.0[3]);
-        arr[2] = self.0[2].wrapping_sub(other.0[2]);
-        arr[1] = self.0[1].wrapping_sub(other.0[1]);
-        arr[0] = self.0[0].wrapping_sub(other.0[0]);
-
-        let (
-            arr6_temp,
-            arr5_temp,
-            arr4_temp,
-            arr3_temp,
-            arr2_temp,
-            arr1_temp,
-            arr0_temp,
-        ) = (
-            arr[6].wrapping_sub((arr[7] > self.0[7]).then_val(1, 0)),
-            arr[5].wrapping_sub((arr[6] > self.0[6]).then_val(1, 0)),
-            arr[4].wrapping_sub((arr[5] > self.0[5]).then_val(1, 0)),
-            arr[3].wrapping_sub((arr[4] > self.0[4]).then_val(1, 0)),
-            arr[2].wrapping_sub((arr[3] > self.0[3]).then_val(1, 0)),
-            arr[1].wrapping_sub((arr[2] > self.0[2]).then_val(1, 0)),
-            arr[0].wrapping_sub((arr[1] > self.0[1]).then_val(1, 0)),
-        );
-
-        let (
-            carry_add5,
-            carry_add4,
-            carry_add3,
-            carry_add2,
-            carry_add1,
-            carry_add0,
-        ) = (
-            arr5_temp.wrapping_sub((arr6_temp > arr[6]).then_val(1, 0)),
-            arr4_temp.wrapping_sub((arr5_temp > arr[5]).then_val(1, 0)),
-            arr3_temp.wrapping_sub((arr4_temp > arr[4]).then_val(1, 0)),
-            arr2_temp.wrapping_sub((arr3_temp > arr[3]).then_val(1, 0)),
-            arr1_temp.wrapping_sub((arr2_temp > arr[2]).then_val(1, 0)),
-            arr0_temp.wrapping_sub((arr1_temp > arr[1]).then_val(1, 0)),
-        );
-
-        let (acarry_add4, acarry_add3, acarry_add2, acarry_add1, acarry_add0) = (
-            carry_add4.wrapping_sub((carry_add5 > arr5_temp).then_val(1, 0)),
-            carry_add3.wrapping_sub((carry_add4 > arr4_temp).then_val(1, 0)),
-            carry_add2.wrapping_sub((carry_add3 > arr3_temp).then_val(1, 0)),
-            carry_add1.wrapping_sub((carry_add2 > arr2_temp).then_val(1, 0)),
-            carry_add0.wrapping_sub((carry_add1 > arr1_temp).then_val(1, 0)),
-        );
-
-        let (an_carry_add3, an_carry_add2, an_carry_add1, an_carry_add0) = (
-            acarry_add3.wrapping_sub((acarry_add4 > carry_add4).then_val(1, 0)),
-            acarry_add2.wrapping_sub((acarry_add3 > carry_add3).then_val(1, 0)),
-            acarry_add1.wrapping_sub((acarry_add2 > carry_add2).then_val(1, 0)),
-            acarry_add0.wrapping_sub((acarry_add1 > carry_add1).then_val(1, 0)),
-        );
-
-        let (ano_carry_add2, ano_carry_add1, ano_carry_add0) = (
-            an_carry_add2
-                .wrapping_sub((an_carry_add3 > acarry_add3).then_val(1, 0)),
-            an_carry_add1
-                .wrapping_sub((an_carry_add2 > acarry_add2).then_val(1, 0)),
-            an_carry_add0
-                .wrapping_sub((an_carry_add1 > acarry_add1).then_val(1, 0)),
-        );
-
-        let (anof_carry_add1, anof_carry_add0) = (
-            ano_carry_add1
-                .wrapping_sub((ano_carry_add2 > an_carry_add2).then_val(1, 0)),
-            ano_carry_add0
-                .wrapping_sub((ano_carry_add1 > an_carry_add1).then_val(1, 0)),
-        );
-
-        let final_0 = anof_carry_add0
-            .wrapping_sub((anof_carry_add1 > ano_carry_add1).then_val(1, 0));
-
-        (arr[6], arr[5], arr[4], arr[3], arr[2], arr[1], arr[0]) = (
-            arr6_temp,
-            carry_add5,
-            acarry_add4,
-            an_carry_add3,
-            ano_carry_add2,
-            anof_carry_add1,
-            final_0,
-        );
-
-        Self(arr)
+        self + (!other + U512::ONE)
     }
 
     fn shift_left_internal(self, rhs: u32) -> Self {

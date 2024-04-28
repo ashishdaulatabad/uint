@@ -1,8 +1,17 @@
+use crate::Split;
+
 use super::{count_bits, ParseUintError, ThenOr};
 
 /// An extended 32-byte (or 256-bit) unsigned integer
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct U256([u64; 4]);
+
+impl Split for u128 {
+    #[inline(always)]
+    fn split(self) -> (u64, u64) {
+        ((self >> 64) as u64, self as u64)
+    }
+}
 
 impl core::fmt::Display for U256 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -112,6 +121,8 @@ impl U256 {
     }
 
     /// Create raw value of unsigned integer
+    #[inline(always)]
+    #[allow(unused)]
     pub(super) fn get_raw(self) -> [u64; 4] {
         self.0
     }
@@ -485,40 +496,45 @@ impl U256 {
         }
     }
 
-    #[inline]
-    fn mul_internal(self, other: U256) -> Self {
-        // Multiply first half and second half
-        let first = self.mul_single_other(other.0[3]);
-        let second = self.mul_single_other(other.0[2]);
-        let third = self.mul_single_other(other.0[1]);
-        let fourth = self.mul_single_other(other.0[0]);
-
-        (first) + (second << 64) + (third << 128) + (fourth << 192)
+    #[inline(always)]
+    fn madd_split(a: u64, b: u64, c: u64) -> (u64, u64) {
+        (u128::from(a) * u128::from(b) + u128::from(c)).split()
     }
 
+    #[inline(always)]
+    fn mul_internal(self, other: U256) -> Self {
+        let mut answer: [u64; 4] = [0; 4];
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[3], other.0[3], 0);
+        answer[3] = answer[3].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[2], other.0[3], hcarry);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[1], other.0[3], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[0], other.0[3], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[3], other.0[2], 0);
+        answer[2] = answer[2].wrapping_add(lcarry);
+        let (hcarry, lcarry) = Self::madd_split(self.0[2], other.0[2], hcarry);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[1], other.0[2], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (hcarry, lcarry) = Self::madd_split(self.0[3], other.0[1], 0);
+        answer[1] = answer[1].wrapping_add(lcarry);
+        let (_, lcarry) = Self::madd_split(self.0[2], other.0[1], hcarry);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        let (_, lcarry) = Self::madd_split(self.0[3], other.0[0], 0);
+        answer[0] = answer[0].wrapping_add(lcarry);
+
+        Self(answer)
+    }
+
+    #[inline(always)]
     pub fn sub_internal(self, other: Self) -> Self {
-        let mut arr = [0; 4];
-        arr[3] = self.0[3].wrapping_sub(other.0[3]);
-        arr[2] = self.0[2].wrapping_sub(other.0[2]);
-        arr[1] = self.0[1].wrapping_sub(other.0[1]);
-        arr[0] = self.0[0].wrapping_sub(other.0[0]);
-
-        let (arr2_temp, arr1_temp, arr0_temp) = (
-            arr[2].wrapping_sub((arr[3] > self.0[3]).then_val(1, 0)),
-            arr[1].wrapping_sub((arr[2] > self.0[2]).then_val(1, 0)),
-            arr[0].wrapping_sub((arr[1] > self.0[1]).then_val(1, 0)),
-        );
-
-        let (carry_add1, carry_add0) = (
-            arr1_temp.wrapping_sub((arr2_temp > arr[2]).then_val(1, 0)),
-            arr0_temp.wrapping_sub((arr1_temp > arr[1]).then_val(1, 0)),
-        );
-
-        let final_0 =
-            carry_add0.wrapping_sub((carry_add1 > arr1_temp).then_val(1, 0));
-        (arr[2], arr[1], arr[0]) = (arr2_temp, carry_add1, final_0);
-
-        Self(arr)
+        self + (!other + U256::ONE)
     }
 
     fn shift_left_internal(self, rhs: u32) -> Self {
