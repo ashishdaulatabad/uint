@@ -17,10 +17,10 @@ trait ThenOr {
 /// ```
 /// use uint::count_bits;
 ///
-/// assert_eq!(count_bits(10), 2);    // 0x0A
-/// assert_eq!(count_bits(15), 4);    // 0x0F
-/// assert_eq!(count_bits(255), 8);    // 0xFF
-/// assert_eq!(count_bits(0xFFFF_FFFF_FFFF_FFFF), 64);
+/// assert_eq!(count_bits(10), 2);       // 0x0A
+/// assert_eq!(count_bits(15), 4);       // 0x0F
+/// assert_eq!(count_bits(255), 8);      // 0x10000
+/// assert_eq!(count_bits(65536), 1);    // 0xFF
 /// assert_eq!(count_bits(0xFFFF_FFFF_FFFF_FFFF), 64);
 /// ```
 pub const fn count_bits(number: u64) -> u64 {

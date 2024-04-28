@@ -661,7 +661,7 @@ impl U256 {
         }
     }
 
-    /// Convenient function to check whether this number is
+    /// Function to check whether this number is
     /// zero or not
     ///
     /// ### Example
